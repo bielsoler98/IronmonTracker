@@ -1,0 +1,53 @@
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.aar
+
+# Signing keys -- never commit these
+*.jks
+*.keystore
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Gradle files
+.gradle/
+build/
+app/build/
+app/.cxx/
+
+# Local configuration file (sdk path, machine-specific)
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ironmon-Tracker's bundled sprite/trainer/box-art assets -- ripped from the
+# actual Pokemon games (Nintendo/Game Freak/Creatures), not original work by
+# the tracker's MIT-licensed author. Keeping these out of the public repo;
+# the app still works locally since the files stay on disk, just untracked.
+# See README.md for where to get them if you're setting up a fresh clone.
+app/src/main/assets/ironmon_tracker/ironmon_tracker/images/
+
+# Runtime-generated tracker state (written by IronmonAndroidBridge.lua on
+# device, never part of the source tree on a dev machine, but ignored just
+# in case a pulled copy ever lands here during debugging)
+ironmon_state.json
