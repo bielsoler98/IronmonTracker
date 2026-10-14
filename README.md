@@ -54,12 +54,23 @@ on, every reset re-randomizes your ROM with that same ruleset.
 
 The `app/src/main/assets/ironmon_tracker/ironmon_tracker/images/` folder is
 intentionally untracked (see `.gitignore`) since it's bundled game artwork, not this
-project's own code. To get a working build:
+project's own code — exactly how Ironmon-Tracker's own upstream project works too
+(their [Installation guide](https://github.com/besteon/Ironmon-Tracker/wiki/Installation-Guide)
+also just points you at their release zip). To get a working build:
 
-1. Download the matching [Ironmon-Tracker release](https://github.com/besteon/Ironmon-Tracker/releases).
-2. Copy its `images/` folder into `app/src/main/assets/ironmon_tracker/ironmon_tracker/images/`.
+1. Download [Ironmon-Tracker v9.3.1](https://github.com/besteon/Ironmon-Tracker/releases/tag/v9.3.1)
+   — the exact version this app is built against (a newer release's `images/` folder
+   will very likely still work, since asset filenames are stable across versions, but
+   v9.3.1 is guaranteed to match).
+2. Inside that download, copy its `ironmon_tracker/images/` folder into this repo at
+   `app/src/main/assets/ironmon_tracker/ironmon_tracker/images/`.
 3. Supply your own legally dumped GBA ROM at runtime — the app loads it from your
    device, it's never part of the repo.
+
+Without step 2, the app still builds and runs fine — Pokémon/badge/item icons just
+render as blank space where the sprite would be (type and status chips fall back to a
+plain text label instead). See `images/` under that same release zip if you only want
+to replace specific icon sets rather than the whole folder.
 
 ## Credits / third-party components
 
