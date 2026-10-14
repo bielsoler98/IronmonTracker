@@ -259,7 +259,7 @@ private fun InfoCenter(state: TrackerState) {
         }
         if (justGotBadge && state.badgeEventIndex in 1..8) {
             val badges = state.player?.badges ?: List(8) { false }
-            queue += InfoSlide("badge", 3500) { BadgeCelebrationSlide(badges, state.badgeEventIndex) }
+            queue += InfoSlide("badge", 3500) { BadgeCelebrationSlide(badges, state.badgeEventIndex, state.gameVersion) }
         }
         if (justEndedBattle) {
             state.location?.let { loc ->
@@ -658,7 +658,7 @@ private fun StarterIntroMovesSlide(mon: PokemonState) {
 }
 
 @Composable
-private fun BadgeCelebrationSlide(obtained: List<Boolean>, justObtainedIndex: Int) {
+private fun BadgeCelebrationSlide(obtained: List<Boolean>, justObtainedIndex: Int, gameVersion: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         repeat(8) { i ->
             val isNew = (i + 1) == justObtainedIndex
@@ -671,7 +671,7 @@ private fun BadgeCelebrationSlide(obtained: List<Boolean>, justObtainedIndex: In
                 },
                 label = "badgePulse",
             )
-            val bitmap = rememberBadgeIcon(i, obtained.getOrElse(i) { false })
+            val bitmap = rememberBadgeIcon(i, obtained.getOrElse(i) { false }, gameVersion)
             if (bitmap != null) {
                 Image(
                     bitmap,
@@ -856,13 +856,13 @@ private fun rememberPokemonIcon(pokemonId: Int): ImageBitmap? {
     }
 }
 
-// Only the FireRed/LeafGreen badge set is bundled here since that's the only
-// game this app has been used with; RSE has its own "RSE_badge*" set in the
-// same folder if a Ruby/Sapphire/Emerald ROM ever needs it.
+// Ruby/Sapphire/Emerald share one badge sprite set upstream ("RSE_badge*"),
+// distinct from FireRed/LeafGreen's ("FRLG_badge*") -- gameVersion comes
+// straight from the bridge's own GameSettings.game read, not guessed here.
 @Composable
-private fun rememberBadgeIcon(index: Int, obtained: Boolean): ImageBitmap? {
+private fun rememberBadgeIcon(index: Int, obtained: Boolean, gameVersion: String): ImageBitmap? {
     val context = LocalContext.current
-    val key = "FRLG_badge${index + 1}${if (obtained) "" else "_OFF"}"
+    val key = "${gameVersion}_badge${index + 1}${if (obtained) "" else "_OFF"}"
     return remember(key) {
         badgeIconCache.getOrPut(key) {
             loadAssetBitmap(context, "ironmon_tracker/ironmon_tracker/images/badges/$key.png")
@@ -1025,7 +1025,7 @@ private fun TrackerOverlay(state: TrackerState?, onOpenBag: () -> Unit) {
         }
 
         // Badges
-        state.player?.badges?.let { BadgesRow(it) }
+        state.player?.badges?.let { BadgesRow(it, state.gameVersion) }
     }
 }
 
@@ -1756,7 +1756,7 @@ private fun TypeChip(type: String, compact: Boolean = false) {
 }
 
 @Composable
-private fun BadgesRow(badges: List<Boolean>) {
+private fun BadgesRow(badges: List<Boolean>, gameVersion: String) {
     Column {
         Text(
             "Badges (${badges.count { it }}/8)",
@@ -1770,7 +1770,7 @@ private fun BadgesRow(badges: List<Boolean>) {
         ) {
             repeat(8) { i ->
                 val obtained = badges.getOrElse(i) { false }
-                val bitmap = rememberBadgeIcon(i, obtained)
+                val bitmap = rememberBadgeIcon(i, obtained, gameVersion)
                 if (bitmap != null) {
                     Image(
                         bitmap,

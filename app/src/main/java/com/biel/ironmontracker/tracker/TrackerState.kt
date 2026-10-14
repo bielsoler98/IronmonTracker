@@ -3,6 +3,9 @@ package com.biel.ironmontracker.tracker
 // Mirrors the JSON structure written by IronmonAndroidBridge.lua
 data class TrackerState(
     val version: Int = 1,
+    // "FRLG" or "RSE" -- which badge icon set to use (RS and Emerald share
+    // one upstream sprite set, distinct from FireRed/LeafGreen's).
+    val gameVersion: String = "FRLG",
     val inBattle: Boolean = false,
     val starterChoice: Int = 0, // 1=left, 2=center, 3=right; 0 = not applicable right now
     // True once the lead (party slot 1) Pokémon's curHP hits 0 -- the upstream

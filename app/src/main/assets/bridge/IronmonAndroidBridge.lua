@@ -1028,8 +1028,14 @@ local function buildAndWrite()
 	-- pick); harmless to keep sending afterward, the app stops showing it.
 	local showStarterHint = playerMon == nil or (playerMon.pokemonID or 0) <= 0
 
+	-- Which badge icon set the Android UI should use -- GameSettings.game:
+	-- 1=Ruby/Sapphire, 2=Emerald, 3=FireRed/LeafGreen (GameSettings.lua).
+	-- RS and Emerald share the same badge sprite set upstream ("RSE_badge*").
+	local gameVersion = GameSettings.game == 3 and "FRLG" or "RSE"
+
 	local state = {
 		version  = 1,
+		gameVersion = gameVersion,
 		inBattle = inBattle,
 		starterChoice = showStarterHint and starterChoice or 0,
 		gameOver      = gameOver,

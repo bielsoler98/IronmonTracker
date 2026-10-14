@@ -11,6 +11,34 @@ screen, badge progress, and more — all read directly from emulated game memory
 the same "don't reveal more than a legitimate blind playthrough would know" rules the
 original Ironmon-Tracker follows.
 
+## Supported ROMs
+
+Ruby, Sapphire, Emerald, FireRed and LeafGreen — the Lua tracker engine detects which
+one is loaded from the cartridge's own game code, no configuration needed. The
+following specific releases are recognized (from `GameAddresses/` in the vendored
+tracker):
+
+- FireRed v1.0, v1.1, J (Japanese); Feuerrote (DE), Rojo Fuego (ES), Rosso Fuoco (IT),
+  Rouge Feu (FR)
+- LeafGreen v1.0, v1.1
+- Ruby v1.0, v1.1, v1.2
+- Sapphire v1.0, v1.1, v1.2
+- Emerald
+
+No checksum is needed for the app to work (it reads the ROM's own internal game code,
+not a hash) — this list is just so you know ahead of time whether your dump is one of
+the recognized revisions. FireRed/LeafGreen is this project's primary target and gets
+the most real play-testing; Ruby/Sapphire/Emerald are supported by the same code paths
+but see less testing.
+
+## Randomizer settings
+
+This app does not ship with, or generate, any randomizer ruleset. You create your own
+`.rnqs` settings file with [Universal Pokemon Randomizer ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx)
+(desktop) or its [Android port](https://github.com/bielsoler98/PokemonRandomizerZX),
+then import it from this app's home screen ("Import randomizer settings"). From then
+on, every reset re-randomizes your ROM with that same ruleset.
+
 ## What this is not
 
 - It does **not** include any Pokémon ROM, BIOS file, or save file. You provide your
