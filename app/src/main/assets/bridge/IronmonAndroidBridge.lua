@@ -936,8 +936,14 @@ local function buildAndWrite()
 			end
 		end
 
+		-- Gate on isWildEncounter: the GBA games don't clear the opponent
+		-- trainer id (gTrainerBattleOpponent_A) when a wild battle starts, so
+		-- getOpponentTrainerId() still returns the LAST trainer fought. Without
+		-- this guard, defeating a trainer and then hitting a wild encounter
+		-- leaks that trainer's panel/party slots over the wild Pokémon. Mirrors
+		-- the not-wild gate on the trainerPartyTotal loop just below.
 		local tId = TrackerAPI.getOpponentTrainerId()
-		if tId and tId > 0 then
+		if not Battle.isWildEncounter and tId and tId > 0 then
 			local tInfo = TrackerAPI.getTrainerInfo(tId) or {}
 			trainerState = { id = tId, name = tInfo.name or "???" }
 			local intel = getTrainerIntelTable(tId)
@@ -1091,10 +1097,18 @@ local function buildAndWrite()
 	local json = safeEncode(state)
 	if not json then return end
 
-	local f = io.open(stateFile, "w")
+	-- Write to a temp file and atomically rename it over the real one. The
+	-- Android poller reads ironmon_state.json on every lastModified change; a
+	-- plain io.open(stateFile, "w") truncates in place, so a read landing
+	-- between the truncate and the write sees empty/partial JSON and drops
+	-- that update. os.rename is atomic within the same directory, so the
+	-- poller only ever sees a fully written file.
+	local tmpFile = stateFile .. ".tmp"
+	local f = io.open(tmpFile, "w")
 	if f then
 		f:write(json)
 		f:close()
+		os.rename(tmpFile, stateFile)
 	end
 end
 
