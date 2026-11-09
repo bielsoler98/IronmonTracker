@@ -311,6 +311,14 @@ class EmulatorViewModel(app: Application) : AndroidViewModel(app) {
             trackerJob?.cancel()
             stopAudioLoop()
 
+            // Drop the previous run's tracker snapshot. startTrackerPolling()
+            // restarts with lastModified=0, so without this it would re-read
+            // the stale ironmon_state.json still on disk and briefly show the
+            // old run's party/badges/location (even a game-over flash) before
+            // the reloaded Lua bridge writes the fresh state.
+            _trackerState.value = null
+            File(filesDir, "ironmon_state.json").delete()
+
             val result = withContext(Dispatchers.IO) {
                 runCatching {
                     EmulatorEngine.stop()

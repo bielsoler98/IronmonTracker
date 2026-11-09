@@ -17,6 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import com.biel.ironmontracker.emulator.EmulatorUiState
 import com.biel.ironmontracker.emulator.EmulatorViewModel
@@ -38,6 +41,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        hideSystemBars()
 
         val hasPhysicalGamepad = InputDevice.getDeviceIds().any { id ->
             val sources = InputDevice.getDevice(id)?.sources ?: 0
@@ -173,6 +177,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // Full-screen immersive mode: hide the status bar (clock/wifi/...) and nav
+    // bar during the whole app. enableEdgeToEdge() alone only draws BEHIND the
+    // system bars (transparent) without hiding them. Swiping from an edge
+    // brings them back transiently, then they auto-hide again.
+    private fun hideSystemBars() {
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Immersive mode is cleared whenever the window loses then regains
+        // focus (returning from background, dismissing a dialog/overlay), so
+        // re-assert it here or the bars silently reappear and never re-hide.
+        if (hasFocus) hideSystemBars()
     }
 
     override fun onPause() {
