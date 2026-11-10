@@ -205,6 +205,17 @@ class MainActivity : ComponentActivity() {
         vm.saveSessionState()
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Not visible any more (home, another app, screen off): stop emulating.
+        vm.onAppBackgrounded()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        vm.onAppForegrounded()
+    }
+
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (vm.handleGamepadKeyEvent(event)) return true
         return super.dispatchKeyEvent(event)
