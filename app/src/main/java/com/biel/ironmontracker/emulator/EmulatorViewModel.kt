@@ -252,6 +252,30 @@ class EmulatorViewModel(app: Application) : AndroidViewModel(app) {
         _hasSessionState.value = ok
     }
 
+    // True while the activity is not visible (another app on top, screen off).
+    // The polling loops below idle on it instead of spinning at 4 ms.
+    @Volatile
+    private var backgrounded = false
+
+    /**
+     * Freezes emulation while the app is not visible. Without this the mGBA
+     * thread and the audio stream kept running at full speed with the screen
+     * off, holding the device awake and burning CPU for hours. The native
+     * paused flag survives stop()/start(), so this is safe to call in any UI
+     * state (e.g. mid-randomize) and is always undone by [onAppForegrounded].
+     */
+    fun onAppBackgrounded() {
+        backgrounded = true
+        EmulatorEngine.pause(true)
+        runCatching { audioTrack?.pause() }
+    }
+
+    fun onAppForegrounded() {
+        backgrounded = false
+        runCatching { audioTrack?.play() }
+        EmulatorEngine.pause(false)
+    }
+
     private val _hasRandomizerSettings = MutableStateFlow(randomizerSettingsFile.exists())
     val hasRandomizerSettings = _hasRandomizerSettings.asStateFlow()
 
@@ -621,6 +645,7 @@ class EmulatorViewModel(app: Application) : AndroidViewModel(app) {
     private fun startFrameLoop() {
         frameJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
+                if (backgrounded) { delay(250); continue }
                 val bmp = EmulatorEngine.getFrame()
                 if (bmp != null) _frame.value = bmp
                 // Battery saver polls at ~60 Hz, matching the core's actual
@@ -659,11 +684,14 @@ class EmulatorViewModel(app: Application) : AndroidViewModel(app) {
             AudioTrack.MODE_STREAM,
             AudioManager.AUDIO_SESSION_ID_GENERATE,
         )
-        track.play()
+        // Created while hidden (e.g. a resume finishing after the user left):
+        // stay silent until onAppForegrounded() starts playback.
+        if (!backgrounded) track.play()
         audioTrack = track
 
         audioJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
+                if (backgrounded) { delay(250); continue }
                 val samples = EmulatorEngine.getAudioSamples()
                 if (samples != null && samples.isNotEmpty()) {
                     // Blocking write: paces this loop to real playback speed,
